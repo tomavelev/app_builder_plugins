@@ -1,0 +1,52 @@
+<!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
+<idea-plugin>
+    <!-- Unique identifier of the plugin. It should be FQN. It cannot be changed between the plugin versions. -->
+    <id>com.programtom.appbuilder.app_builder_plugin</id>
+
+    <!-- Public plugin name should be written in Title Case.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
+    <name>App Builder and Code Generator</name>
+
+    <!-- A displayed Vendor name or Organization ID displayed on the Plugins Page. -->
+    <vendor email="tomavelev@programtom.com" url="https://www.programtom.com/dev/">Program Tom LTD</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+    <description><![CDATA[
+    IntelliJ Plugin that connects to Program Tom LTD - App Buidler Platform.
+]]></description>
+
+    <!-- Product and plugin compatibility requirements.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <depends>com.intellij.modules.lang</depends>
+
+    <actions>
+        <!--suppress PluginXmlCapitalization -->
+        <action class="com.programtom.appbuilder.app_builder_plugin.action.AppBuilderAndCodeGeneratorAction"
+                id="com.programtom.appbuilder.app_builder_plugin.action"
+                text="App Builder Action"
+                icon="/icons/programtom.png"
+                description="Generate code from Program Tom App Builder Platform">
+            <add-to-group group-id="NewGroup" anchor="first"/>
+        </action>
+        <!--suppress PluginXmlCapitalization -->
+        <action class="com.programtom.appbuilder.app_builder_plugin.action.AppBuilderAndCodeGeneratorSetupAction"
+                id="com.programtom.appbuilder.app_builder_plugin.setup"
+                text="Setup Program Tom - App Builder"
+                icon="/icons/programtom.png"
+                description="Setup the Generators - loaded from Program Tom - App Builder">
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
+
+        </action>
+    </actions>
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <intentionAction>
+            <className>com.programtom.appbuilder.app_builder_plugin.action.ExistingFileAction</className>
+            <category>ProgramTomIntentAction</category>
+        </intentionAction>
+    </extensions>
+</idea-plugin>
