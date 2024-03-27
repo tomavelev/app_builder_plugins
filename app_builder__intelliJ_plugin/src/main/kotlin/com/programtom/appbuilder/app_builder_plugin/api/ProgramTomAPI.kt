@@ -57,10 +57,11 @@ class ProgramTomAPI {
             return Gson().fromJson(body, AppBuilderDataContainer::class.java)
         }
 
-        fun improveCode(existingFileCodeAssist: ExistingFileCodeAssist, text: String): String {
+        fun improveCode(existingFileCodeAssist: ExistingFileCodeAssist, text: String, lineNumber: Int): String {
             val request =
                 HttpRequest.newBuilder().uri(existingFileCodeAssist.codeTransformUrl?.let { URI.create(it) })
                     .POST(HttpRequest.BodyPublishers.ofString(text))
+                    .header("lineNumber", lineNumber.toString())
                     .build()
             val response = client.send(request, HttpResponse.BodyHandlers.ofString());
             return response.body()

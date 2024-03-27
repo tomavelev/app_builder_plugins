@@ -13,6 +13,7 @@ import com.intellij.psi.PsiDocumentManager
 import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import com.intellij.util.IncorrectOperationException
+import com.programtom.appbuilder.app_builder_plugin.Util
 import com.programtom.appbuilder.app_builder_plugin.api.ProgramTomAPI
 import com.programtom.appbuilder.app_builder_plugin.model.ActivatorGroup
 import com.programtom.appbuilder.app_builder_plugin.model.CodeProvider
@@ -45,7 +46,8 @@ class ExistingFileAction : PsiElementBaseIntentionAction(), IntentionAction {
         WriteCommandAction.runWriteCommandAction(project) {
             CommandProcessor.getInstance().executeCommand(
                 project, {
-                    val code = ProgramTomAPI.improveCode(existingFileCodeAssist, editor.document.text)
+                    val lineNumber = editor.caretModel.logicalPosition.line
+                    val code = ProgramTomAPI.improveCode(existingFileCodeAssist, editor.document.text, lineNumber)
                     editor.document.setText(code.trim())
                 }, "Improve Existing Code ${existingFileCodeAssist.displayName}", null
             )
@@ -63,11 +65,13 @@ class ExistingFileAction : PsiElementBaseIntentionAction(), IntentionAction {
             } else {
                 val matchedActivators = mutableListOf<String>()
                 val matchedGroupsMap = mutableMapOf<String, ActivatorGroup>()
+                val lineNumber = editor.caretModel.logicalPosition.line
+                val line = editor.document.text.split("\n")[lineNumber]
 
                 AppBuilderAndCodeGeneratorSetupAction.appBuilderDataContainer!!.activatorGroups.forEach { ag ->
                     if (ag.id != null) {
 
-                        val matchedAll = matchActivators(ag, currentFile.virtualFile.path)
+                        val matchedAll = matchActivators(ag, currentFile.virtualFile.path, editor.document.text, line)
 
                         matchedGroupsMap[ag.id!!] = ag
                         if (matchedAll) {
@@ -91,7 +95,7 @@ class ExistingFileAction : PsiElementBaseIntentionAction(), IntentionAction {
 
 
                 if (fileCodeAssistSet.isNotEmpty()) {
-                   val list = arrayListOf<ExistingFileCodeAssist>();
+                    val list = arrayListOf<ExistingFileCodeAssist>()
                     list.addAll(fileCodeAssistSet)
 
                     for (i in list.indices.reversed()) {
@@ -109,7 +113,7 @@ class ExistingFileAction : PsiElementBaseIntentionAction(), IntentionAction {
                         if (listActivatorGroup.isNotEmpty()) {
                             var matchesAllGroups = true
                             listActivatorGroup.forEach {
-                                if (!matchActivators(it, editor.document.text)) {
+                                if (!matchActivators(it, currentFile.virtualFile.path, editor.document.text, line)) {
                                     matchesAllGroups = false
                                 }
                             }
@@ -126,13 +130,12 @@ class ExistingFileAction : PsiElementBaseIntentionAction(), IntentionAction {
                 }
 
             }
-
         }
         return false
     }
 
     private fun matchActivators(
-        ag: ActivatorGroup, content: String
+        ag: ActivatorGroup, path: String, editorContent: String, line: String
     ): Boolean {
         var matchedAll = true
         for (i in 0 until ag.generatorActivatorList.size) {
@@ -140,8 +143,21 @@ class ExistingFileAction : PsiElementBaseIntentionAction(), IntentionAction {
                 matchedAll = false
                 break
             }
-            if (!AppBuilderAndCodeGeneratorAction.getRegex(ag.generatorActivatorList[i].regex!!).matches(content)
-            //TODO improve this by adding parameter in the activator - for what stage should be checked and minimize iterations
+
+            val input = when (ag.type) {
+                Util.ACTIVATOR_GROUP_TYPE_FILE_PATH -> {
+                    path
+                }
+
+                Util.ACTIVATOR_GROUP_TYPE_CONTENT -> {
+                    editorContent
+                }
+
+                else -> {
+                    line
+                }
+            }
+            if (!AppBuilderAndCodeGeneratorAction.getRegex(ag.generatorActivatorList[i].regex!!).matches(input)
             ) {
                 matchedAll = false
                 break
@@ -157,11 +173,13 @@ class ExistingFileAction : PsiElementBaseIntentionAction(), IntentionAction {
     override fun getFamilyName(): @IntentionFamilyName String {
 
         return if (fileCodeAssistSet.isEmpty()) {
+            @Suppress("DialogTitleCapitalization")
             "No Code Assist"
         } else if (fileCodeAssistSet.size == 1) {
             fileCodeAssistSet.first().name!!
         } else {
-            "Multiple Code Assistants (TODO)"
+            @Suppress("DialogTitleCapitalization")
+            "Multiple Code Assistants"
         }
     }
 

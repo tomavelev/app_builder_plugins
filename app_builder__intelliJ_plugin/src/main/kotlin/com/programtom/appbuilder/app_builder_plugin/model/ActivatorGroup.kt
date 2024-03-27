@@ -4,6 +4,7 @@ data class ActivatorGroup(
     var id: String? = null,
     private val codeProviderId: String? = null,
     val name: String? = null,
+    val type: String? = null,
     val generatorActivatorList: List<Activator>,
 
     )

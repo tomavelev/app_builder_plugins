@@ -10,6 +10,5 @@ data class CodeProviderPlatform(
     private val builders: List<Builder>,
     private val countBuilder: Long = 0,
     val generators: List<Generator>,
-    val fileChanges: List<FileChange>,
     private val countGenerator: Long = 0,
 )
